@@ -1,0 +1,20 @@
+
+wget http://files.grouplens.org/datasets/movielens/ml-100k.zip
+
+sudo unzip -d /home/cloudera/Downloads/ ml-100k.zip
+
+hive
+
+CREATE DATABASE movielens;
+
+CREATE TABLE usertable (userid INT, age INT, sex STRING, job STRING, zipcode STRING)  row format DELIMITED FIELDS TERMINATED BY '|' LINES TERMINATED BY '\n';
+
+LOAD DATA LOCAL INPATH '/home/cloudera/Downloads/ml-100k/u.user' INTO TABLE usertable;
+
+DESCRIBE usertable;
+
+SELECT * FROM usertable WHERE job = 'student';
+
+SELECT COUNT(job) FROM usertable WHERE job = 'student';
+
+SELECT COUNT(job) FROM usertable WHERE job = 'student' AND age <= 18;
