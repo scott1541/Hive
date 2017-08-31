@@ -1,24 +1,34 @@
+--Impala
 
-/////////////////////////////////////////////////////////////////////////////
+impala-shell
+
+INVALIDATE METADATA;
+
+USE movielens;
+
+SELECT * FROM userdata;
+
+
+
+////////////////////////////////////////////////////////////////////////////
 Exercise 1
-
-wget http://files.grouplens.org/datasets/movielens/ml-100k.zip
-
-sudo unzip -d (/home/cloudera/Downloads/) ml-100k.zip
-
-hive
 
 CREATE DATABASE movielens;
 
-CREATE TABLE usertable (userid INT, age INT, sex STRING, job STRING, zipcode STRING)  row format DELIMITED FIELDS TERMINATED BY '|' LINES TERMINATED BY '\n';
+USE movielens;
 
-LOAD DATA LOCAL INPATH '/home/cloudera/Downloads/ml-100k/u.user' INTO TABLE usertable;
+
+CREATE TABLE usertable (userid INT, age INT, sex STRING, job STRING, zipcode STRING)  row format DELIMITED FIELDS TERMINATED BY '|' LINES TERMINATED BY '\n';
 
 DESCRIBE usertable;
 
-SELECT * FROM usertable WHERE job = 'student';
+sudo hadoop fs -put /home/cloudera/Downloads/ml-100k/u.user  /user/hive/warehouse/movielens.db/usertable
 
-SELECT COUNT(job) FROM usertable WHERE job = 'student';
+invalidate metadata;
+
+SELECT * FROM usertable WHERE job = 'engineer';
+
+SELECT * FROM usertable WHERE sex = 'F' AND age <= 18;
 
 SELECT COUNT(job) FROM usertable WHERE job = 'student' AND age <= 18;
 
@@ -27,7 +37,6 @@ SELECT COUNT(job) FROM usertable WHERE job = 'student' AND age <= 18;
 ////////////////////////////////////////////////////////////////////////////
 Exercise 2
 
-hadoop fs -cat /user/hive/warehouse/movielens.db/usertable/u.user
 
 CREATE TABLE IF NOT EXISTS filmtable (filmid INT, 
                             title STRING, 
@@ -57,22 +66,17 @@ CREATE TABLE IF NOT EXISTS filmtable (filmid INT,
                             FIELDS TERMINATED BY '|' 
                             LINES TERMINATED BY '\n';
 
-
 sudo hadoop fs -put /home/cloudera/Downloads/ml-100k/u.item  /user/hive/warehouse/movielens.db/filmtable
 
-hadoop fs -ls /user/hive/warehouse/movielens.db/filmtable/
+hadoop fs -cat /user/hive/warehouse/movielens.db/filmtable/u.item
 
-hive
+SELECT title FROM filmtable LIMIT 10;
 
-LOAD DATA INPATH '/user/hive/warehouse/movielens.db/filmtable/u.item' INTO TABLE filmtable;
-
-SELECT * FROM filmtable LIMIT 1;
-
-SELECT title FROM filmtable ORDER BY title ASC;
+SELECT title FROM filmtable WHERE comedy = 1 AND scifi = 1;
 
 
 
-/////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
 Exercise 3
 
 CREATE TABLE IF NOT EXISTS customers (custid INT,
@@ -80,21 +84,7 @@ fname STRING,
 lname STRING,
 email STRING,
 phone MAP<STRING, STRING>,
-address STRUCT<line1:STRING, line2:STRING, city:STRING, county:STRING, postcode:STRING>,
-orderids ARRAY<INT>,
-ordervalue STRUCT<min:INT, max:INT, avg:INT, total:INT>)
+address STRUCT<line1:STRING, line2:STRING, city:STRING, county:STRING, postcode:STRING>
+
 ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'
-COLLECTION ITEMS TERMINATED BY ','
 MAP KEYS TERMINATED BY ':';
-
-ALTER TABLE customers RENAME TO clients;
-
-ALTER TABLE clients CHANGE fname forename STRING;
-ALTER TABLE clients CHANGE lname surname STRING;
-
-ALTER TABLE clients CHANGE custid custid BIGINT;
-
-ALTER TABLE clients ADD COLUMNS (fax STRING, bonuspoints INT);
-
-
-DROP TABLE clients;
