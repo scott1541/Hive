@@ -33,6 +33,11 @@ SELECT * FROM usertable WHERE sex = 'F' AND age <= 18;
 SELECT COUNT(job) FROM usertable WHERE job = 'student' AND age <= 18;
 
 
+SELECT job, MIN(age), MAX(age), AVG(age) FROM usertable GROUP BY job ORDER BY AVG(age) ASC;
+
+SELECT job, SUM(CASE WHEN sex = 'M' THEN 1 ELSE 0 END) as male,
+			SUM(CASE WHEN sex = 'F' THEN 1 ELSE 0 END) as female
+			FROM usertable GROUP BY job ORDER BY job ASC;
 
 ////////////////////////////////////////////////////////////////////////////
 Exercise 2
@@ -78,6 +83,35 @@ SELECT title FROM filmtable WHERE comedy = 1 AND scifi = 1;
 
 ////////////////////////////////////////////////////////////////////////////
 Exercise 3
+
+
+///////// Done in hive /////////
+CREATE TABLE IF NOT EXISTS customers (custid INT,
+fname STRING,
+lname STRING,
+email STRING,
+phone MAP<STRING, STRING>,
+address STRUCT<line1:STRING, line2:STRING, city:STRING, county:STRING, postcode:STRING>,
+orderids ARRAY<INT>,
+ordervalue STRUCT<min:INT, max:INT, avg:INT, total:INT>)
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '|'
+COLLECTION ITEMS TERMINATED BY ','
+MAP KEYS TERMINATED BY ':';
+
+CREATE TABLE addrS (line1 STRING, line2 STRING, city STRING, county STRING, postcode STRING);
+--CREATE TABLE orderS (min: INT, max: INT, avg: INT, total: INT);
+INSERT INTO addrS values('32 Fake street', 'Fakevillage', 'Manchester', 'Manchestershire', 'M50 3YJ');
+--INSERT INTO orderS (1, 6, 4, 17);
+
+INSERT INTO customers SELECT named_struct('line1', line1, 'line2', line2, 'city', city, 
+                                        'county', county, 'postcode', postcode) FROM addrS;
+
+
+--INSERT INTO TABLE customers values(77, 'John', 'Smith', 'jpsmith@gmail.com', 
+--<'0796234565', '0116334538'>, SELECT NAMED_STRUCT )
+
+
+/////////////////////////////////
 
 CREATE TABLE IF NOT EXISTS customers (custid INT,
 fname STRING,
